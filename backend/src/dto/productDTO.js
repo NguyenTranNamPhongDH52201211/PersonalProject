@@ -76,7 +76,7 @@ export class ProductResponseDTO {
 
 export class ProductListResponseDTO {
     constructor(product) {
-        this.product_id = product.product_id;
+        this.product_id=product.product_id;
         this.product_code = product.product_code;
         this.product_name = product.product_name;
         this.product_base_price = parseFloat(product.product_base_price);
