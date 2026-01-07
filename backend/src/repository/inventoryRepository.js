@@ -1,20 +1,20 @@
 import db from '../config/database.js';
-import { v4 as uuidv4 } from 'uuid';
+
 const ALLOWED_FIELDS = [
   'invent_quantity_available',
   'invent_quantity_reserved',
   'invent_reorder_level'
 ];
-class InventoryRespository{
+class InventoryRepository{
 
     async findByProductId(productID){
-        const sql =`SELECT invent_quantity_available FROM inventory WHERE invent_product_id = ?`;
+        const sql =`SELECT invent_quantity_available, invent_quantity_reserved, invent_order_level FROM inventory WHERE invent_product_id = ?`;
         const [rows]= await db.execute(sql, [productID]);
-        return rows[0];
+        return rows.length ? rows[0] : null;
     }
 
-    async create(data){
-        const sql = `INSERT INTO invetory (
+    async create(data,){
+        const sql = `INSERT INTO inventory (
             invent_product_id,
             invent_quantity_available,
             invent_quantity_reserved,
@@ -36,14 +36,14 @@ class InventoryRespository{
            return results.affectedRows > 0;
     }
 
-    async update(productId, productData){
+    async update(productId, data){
          const fields=[];
          const params=[];
 
-         Object.keys(productData).forEach(key =>{
+         Object.keys(data).forEach(key =>{
             if(ALLOWED_FIELDS.includes(key)){
             fields.push(`${key} = ?`);
-            params.push(productData[key]);
+            params.push(data[key]);
             }
          });
 
@@ -54,13 +54,10 @@ class InventoryRespository{
          const sql=`UPDATE inventory SET ${fields.join(', ')} WHERE invent_product_id = ?`;
          const [results]= await db.execute(sql, params);
 
-         if(results.affectedRows===0){
-            return null;
-         }
-
-         return true;
+       
+         return results.affectedRows > 0;
     }
   
 }
 
-export default new InventoryRespository();
+export default new InventoryRepository();

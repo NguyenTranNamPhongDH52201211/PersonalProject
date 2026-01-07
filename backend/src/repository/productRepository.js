@@ -11,9 +11,43 @@ const ALLOWED_FIELDS = [
     'product_is_featured'
 ];
 class ProductRepository {
-    async findAll() {
-        let sql = `SELECT product_code, product_name, product_base_price, product_brand FROM product`;
-        const [products] = await db.execute(sql);
+    async findAll(options = {}) {
+        let sql = `SELECT product_code, product_name, product_base_price, product_brand FROM product `;
+
+        const conditions = [];
+        const params = [];
+        if (options.filters?.brandId) {
+            sql += `product_brand = ?`;
+            params.push(options.filters.brandId);
+        }
+
+        if (options.filters?.categoryId) {
+            sql += `product_category_id = ?`;
+            params.push(options.filters.categoryId);
+        }
+
+        if (options.filters?.minPrice && options.filters?.maxPrice) {
+            conditions.push(`product_base_price BETWEEN ? AND ?`);
+            params.push(options.filters.minPrice, options.filters.maxPrice);
+        }
+        
+        if (conditions.length > 0) {
+            sql += ` WHERE ` + conditions.join(' AND ');
+        }
+
+
+        sql += `ORDER BY product_created_at DESC`;
+
+        if (options.limit) {
+            sql += ` LIMIT ?`;
+            params.push(options.limit);
+        }
+        if (options.offset) {
+            sql += ` OFFSET ?`;
+            params.push(options.offset);
+        }
+
+        const [products] = await db.execute(sql, params);
         return products;
     }
 
@@ -84,10 +118,10 @@ class ProductRepository {
         const params = [];
 
         Object.keys(productData).forEach(key => {
-             if(ALLOWED_FIELDS.includes(key)){
-            fields.push(`${key} = ?`);
-            params.push(productData[key]);
-             }
+            if (ALLOWED_FIELDS.includes(key)) {
+                fields.push(`${key} = ?`);
+                params.push(productData[key]);
+            }
         });
 
         if (fields.length === 0) {

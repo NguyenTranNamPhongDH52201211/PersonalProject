@@ -5,7 +5,7 @@ const ALLOWED_FIELDS = [
     'image_display_order',
     'images_is_primary',
 ];
-class ProductImageRespository{
+class ProductImageRepository{
     async findAll(){
         let sql=`SELECT image_id, image_url, image_alt_text, image_display_order, image_is_primary FROM product_image`;
         const [images]= await db.execute(sql);
@@ -66,4 +66,4 @@ class ProductImageRespository{
     }
 }
 
-export default new ProductImageRespository;
+export default new ProductImageRepository;
